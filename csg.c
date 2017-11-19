@@ -279,7 +279,7 @@ void motion(int x, int y)
   glutPostRedisplay();
 }
 
-GLfloat lightPosition[] = {0.f, 0.f, 0.f, 0.f};
+GLfloat lightPosition[] = {25.f, 50.f, -50.f, 1.f};
 void defineLightConfiguration() {
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
@@ -287,7 +287,7 @@ void defineLightConfiguration() {
 
     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    glEnable(GL_COLOR_MATERIAL);
+    //glEnable(GL_COLOR_MATERIAL);
 }
 
 int main(int argc, char **argv)
@@ -295,9 +295,8 @@ int main(int argc, char **argv)
     static GLfloat lightpos[] = {25.f, 50.f, -50.f, 1.f};
     static GLfloat sphere_mat[] = {1.f, .5f, 0.f, 1.f};
     static GLfloat cone_mat[] = {0.f, .5f, 1.f, 1.f};
-    static GLfloat cube_mat[] = {1.f, .0f, 0.f, 0.f};
+    static GLfloat cube_mat[] = {1.f, .0f, 0.f, 1.f};
     GLUquadricObj *sphere, *cone, *base, *cube;
-    defineLightConfiguration();
 
     glutInit(&argc, argv);
     glutInitWindowSize(512, 512);
@@ -343,6 +342,7 @@ int main(int argc, char **argv)
     glEndList();
     
     glNewList(CUBE, GL_COMPILE);
+    //defineLightConfiguration();
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cube_mat);
     glutSolidCube(30);
     glEndList();
