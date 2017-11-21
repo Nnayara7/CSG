@@ -121,6 +121,8 @@ int csg_op = CSG_A;
 /* add menu callback */
 
 GLfloat viewangle;
+GLfloat viewangley;
+
 
 void redraw()
 {
@@ -129,6 +131,8 @@ void redraw()
 
     glPushMatrix();
     glRotatef(viewangle, 0.f, 1.f, 0.f);
+    glRotatef(viewangley, 1.f, 0.f, 0.f);
+    //viewangle = 0.0;
 
     switch(csg_op) {
     case CSG_A:
@@ -197,16 +201,23 @@ void special(int key, int x, int y)
 {
   switch(key) {
   case GLUT_KEY_LEFT:
-    glutIdleFunc(anim);
-    animDirection = ANIM_LEFT;
+    //glutIdleFunc(anim);
+    viewangle -= 3.f;
+    redraw();
     break;
   case GLUT_KEY_RIGHT:
-    glutIdleFunc(anim);
-    animDirection = ANIM_RIGHT;
+    //glutIdleFunc(anim);
+    viewangle += 3.f;
+    redraw();
     break;
   case GLUT_KEY_UP:
+  	  viewangley += 3.f;
+	  redraw();
+	  break;
   case GLUT_KEY_DOWN:
-    glutIdleFunc(0);
+  	  viewangley -= 3.f;
+	  redraw();
+	  break;
     break;
   }
 }
@@ -332,7 +343,7 @@ int main(int argc, char **argv)
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
 
-    /* make display lists for sphere,cone and cube */
+/* make display lists for sphere,cone and cube */
 
     glNewList(SPHERE, GL_COMPILE);
     sphere = gluNewQuadric();
@@ -365,11 +376,3 @@ int main(int argc, char **argv)
 
     return 0;
 }
-
-
-
-
-
-
-
-
