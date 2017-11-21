@@ -145,6 +145,7 @@ void redraw()
     switch(csg_op) {
     case CSG_A:
       one(cone);
+      // e(cone, sphere);  
       break;
     case CSG_B:
       one(sphere);
@@ -193,32 +194,7 @@ void menu(int csgop)
   csg_op = csgop;
   glutPostRedisplay();
 }
-// 
-/* special keys, like array and F keys */
-void special(int key, int x, int y)
-{
-  switch(key) {
-  case GLUT_KEY_LEFT:
-    //glutIdleFunc(anim);
-    viewangle -= 3.f;
-    redraw();
-    break;
-  case GLUT_KEY_RIGHT:
-    //glutIdleFunc(anim);
-    viewangle += 3.f;
-    redraw();
-    break;
-  case GLUT_KEY_UP:
-  	  viewangley += 3.f;
-	  redraw();
-	  break;
-  case GLUT_KEY_DOWN:
-  	  viewangley -= 3.f;
-	  redraw();
-	  break;
-    break;
-  }
-}
+
 
 void key(unsigned char key, int x, int y)
 {
@@ -253,27 +229,6 @@ void posicionaObservador (void) {
     glRotatef(rotY,0,1,0);   
 }
 
-void motion(int x, int y){
-    if(bot == GLUT_LEFT_BUTTON){//Rotação
-        int deltaX = x_ini - x;
-        int deltaY = y_ini - y; 
-        rotX = rotX_ini - deltaY/ SENS_ROT;
-        rotY = rotY_ini - deltaX/ SENS_ROT;
-     }
-     else if (bot == GLUT_RIGHT_BUTTON){//Zoom
-         int deltaZ = y_ini - y;
-         obsZ = obsZ_ini + deltaZ/ SENS_OBS;
-     }
-     else if (bot == GLUT_MIDDLE_BUTTON){//Correr
-         int deltaX = x_ini - x;
-         int deltaY = y_ini - y;
-         obsX = obsX_ini + deltaX/ SENS_TRANS;
-         obsY = obsY_ini + deltaY/ SENS_TRANS;
-     }
-     posicionaObservador();
-     glutPostRedisplay();
-}
-
 void especificaParametrosVisuais (void){
     glMatrixMode(GL_PROJECTION);/*Modo de visualização da matriz, Projeção*/
     glLoadIdentity();
@@ -289,19 +244,87 @@ void redesenhaPrimitivas(GLsizei largura, GLsizei altura){
     especificaParametrosVisuais();        
 }
 
+int picked_object;
+int xpos = 0, ypos = 0;
+int newxpos, newypos;
+int startx, starty;
+
 void mouse(int botao, int estado, int x, int y){
-    if(estado == GLUT_DOWN){
-        x_ini = x;
-        y_ini = y;
-        obsX_ini = obsX;
-        obsY_ini = obsY;
-        obsZ_ini = obsZ;
-        rotX_ini = rotX;
-        rotY_ini = rotY;
-        bot=botao;
-    }
-    else
-        bot = -1;
+  //   if (botao == GLUT_RIGHT_BUTTON){
+		// if(estado == GLUT_UP) {
+		// 	picked_object = botao;
+		// 	xpos += newxpos;
+		// 	ypos += newypos;
+		// 	newxpos = 0;
+		// 	newypos = 0;
+		// 	bot=botao;
+		// } else { /* GLUT_DOWN */
+		// 	startx = x;
+		// 	starty = y;
+		// 	bot = 2;
+		// }
+  //  	}
+  //  	else{
+		if(estado == GLUT_DOWN){
+	        x_ini = x;
+	        y_ini = y;
+	        obsX_ini = obsX;
+	        obsY_ini = obsY;
+	        obsZ_ini = obsZ;
+	        rotX_ini = rotX;
+	        rotY_ini = rotY;
+	        bot=botao;
+	    }
+    	else
+	        bot = -1;		
+// 	}
+}
+
+#define DEGTORAD (2 * 3.1415 / 360)
+void motion(int x, int y){
+    if(bot == GLUT_LEFT_BUTTON){//Rotação
+        int deltaX = x_ini - x;
+        int deltaY = y_ini - y; 
+        rotX = rotX_ini - deltaY/ SENS_ROT;
+        rotY = rotY_ini - deltaX/ SENS_ROT;
+     }
+     else if (bot == GLUT_RIGHT_BUTTON){//Zoom
+		GLfloat r, objx, objy, objz;
+		
+		newxpos = x - startx;
+		newypos = starty - y;
+		
+		r = (newxpos + xpos) * 50.f/512.f;
+		objx = r * (float)cos(viewangle * DEGTORAD);
+		objy = (newypos + ypos) * 50.f/512.f;
+		objz = r * (float)sin(viewangle * DEGTORAD);
+		
+		switch(picked_object) {
+			case CSG_A:
+				coneX = objx;
+				coneY = objy;
+				coneZ = objz;
+			break;
+			case CSG_B:
+				sphereX = objx;
+				sphereY = objy;
+				sphereZ = objz;
+			break;
+			case CSG_C:
+				cubeX = objx;
+				cubeY = objy;
+				cubeZ = objz;
+			break;
+		}
+     }
+     else if (bot == GLUT_MIDDLE_BUTTON){//Correr
+         int deltaX = x_ini - x;
+         int deltaY = y_ini - y;
+         obsX = obsX_ini + deltaX/ SENS_TRANS;
+         obsY = obsY_ini + deltaY/ SENS_TRANS;
+     }
+     posicionaObservador();
+     glutPostRedisplay();
 }
 
 void stop()
@@ -328,7 +351,6 @@ int main(int argc, char **argv)
     glutMouseFunc(mouse);/*Rotina do mouse*/
     glutMotionFunc(motion);/*Rotina do movimento*/ 
     glutKeyboardFunc(key); /*Rotina de teclado*/
-    glutSpecialFunc(special);
     init();
 
     glutCreateMenu(menu);
