@@ -13,7 +13,7 @@ int x_ini,y_ini, bot;
 
 enum {CSG_A, CSG_B, CSG_C,CSG_A_OR_B, CSG_A_OR_C, CSG_B_OR_C, CSG_A_AND_B, CSG_A_SUB_B, CSG_B_SUB_A, CSG_B_SUB_C, CSG_A_SUB_C, CSG_A_AND_C};
 
-enum {SPHERE = 1, CONE, CUBE};
+enum {SPHERE = 1, CONE, CUBE, CYLINDER};
 
 /* Draw a cone */
 GLfloat coneX = 0.f, coneY = 0.f, coneZ = 0.f;
@@ -46,6 +46,15 @@ void cube() {
   glTranslatef(cubeX, cubeY, cubeZ);
   glTranslatef(0, 20, 0);
   glCallList(CUBE);
+  glPopMatrix();
+}
+
+GLfloat cylX = 0.f, cylY = 0.f, cylZ = 0.f;
+void cylinder() {
+  glPushMatrix();
+  glTranslatef(cylX, cylY, cylZ);
+  glRotatef(-90.0, 1.f, 0.f, 0.f);
+  glCallList(CYLINDER);
   glPopMatrix();
 }
 
@@ -144,7 +153,7 @@ void redraw()
 
     switch(csg_op) {
     case CSG_A:
-      one(cone);
+      one(cylinder);
       // e(cone, sphere);  
       break;
     case CSG_B:
@@ -154,7 +163,7 @@ void redraw()
       one(cube);
       break;
     case CSG_A_OR_B:
-      ou(cone, sphere);
+      ou(cylinder, sphere);
       break;
     case CSG_A_OR_C:
       ou(cone, cube);
@@ -396,6 +405,20 @@ int main(int argc, char **argv)
     gluQuadricOrientation(base, GLU_INSIDE);
     gluDisk(base, 0., 15., 64, 1);
     gluCylinder(cone, 15., 0., 60., 64, 64);
+    gluDeleteQuadric(cone);
+    gluDeleteQuadric(base);
+    glEndList();
+    
+    glNewList(CYLINDER, GL_COMPILE);
+    cone = gluNewQuadric();
+    base = gluNewQuadric();
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cone_mat);
+    gluQuadricOrientation(base, GLU_INSIDE);
+    gluDisk(base, 0., 10., 64, 1);
+    gluCylinder(cone, 10., 10., 60., 64, 64);
+    glRotatef(180.0, 1.f, 0.f, 0.f);
+    glTranslatef(0, 0, -60);
+    gluDisk(base, 0., 10., 64, 1);
     gluDeleteQuadric(cone);
     gluDeleteQuadric(base);
     glEndList();
