@@ -10,10 +10,35 @@ int x_ini,y_ini, bot;
 #define SENS_OBS 10.0
 #define SENS_TRANS 10.0
 
-
-enum {CSG_A, CSG_B, CSG_C,CSG_A_OR_B, CSG_A_OR_C, CSG_B_OR_C, CSG_A_AND_B, CSG_A_SUB_B, CSG_B_SUB_A, CSG_B_SUB_C, CSG_A_SUB_C, CSG_A_AND_C};
+enum {
+		CYL,
+		CON,
+		CUB,
+		SPH,
+		CYL_OR_CON,
+		CYL_OR_CUB,
+		CYL_OR_SPH,
+		CON_OR_CUB,
+		CON_OR_SPH,
+		CUB_OR_SPH,
+		CYL_AND_CON,
+		CYL_AND_CUB,
+		CYL_AND_SPH,
+		CON_AND_CUB,
+		CON_AND_SPH,
+		CUB_AND_SPH,
+		CYL_SUB_CON,
+		CYL_SUB_CUB,
+		CYL_SUB_SPH,
+		CON_SUB_CUB,
+		CON_SUB_SPH,
+		CUB_SUB_SPH	
+	  };
 
 enum {SPHERE = 1, CONE, CUBE, CYLINDER};
+int csg_op = CYL;
+bool reverse = true; 
+GLfloat viewangle;
 
 /* Draw a cone */
 GLfloat coneX = 0.f, coneY = 0.f, coneZ = 0.f;
@@ -137,13 +162,6 @@ void sub(void(*a)(void), void(*b)(void))
   glDisable(GL_STENCIL_TEST); /* reset things */
 }
 
-int csg_op = CSG_A;
-
-/* add menu callback */
-
-GLfloat viewangle;
-GLfloat viewangley;
-
 void redraw()
 {
   /* clear stencil each time */
@@ -152,197 +170,90 @@ void redraw()
 	glMatrixMode(GL_MODELVIEW);
 
     switch(csg_op) {
-    case CSG_A:
-      one(cylinder);
-      // e(cone, sphere);  
-      break;
-    case CSG_B:
-      one(sphere);
-      break;
-      case CSG_C:
-      one(cube);
-      break;
-    case CSG_A_OR_B:
-      ou(cylinder, sphere);
-      break;
-    case CSG_A_OR_C:
-      ou(cone, cube);
-      break;
-    case CSG_B_OR_C:
-      ou(sphere, cube);
-      break;
-    case CSG_A_AND_B:
-      e(cone, sphere);
-      break;
-    case CSG_A_AND_C:
-      e(cone, cube);
-      break;
-    case CSG_A_SUB_B:
-      sub(cone, sphere);
-      break;
-    case CSG_A_SUB_C:
-      sub(cone, cube);
-      break;
-    case CSG_B_SUB_A:
-      sub(sphere, cone);
-      break;
-    case CSG_B_SUB_C:
-      sub(sphere, cube);
-      break;
+		case CYL:	one(cylinder);				break;
+		case CON:	one(cone);					break;
+		case CUB:	one(cube);					break;
+		case SPH:	one(sphere);				break;
+		case CYL_OR_CON: (reverse) ? ou(cylinder, cone)		: ou(cone, cylinder);	break;
+		case CYL_OR_CUB: (reverse) ? ou(cylinder, cube)		: ou(cube, cylinder);	break;
+		case CYL_OR_SPH: (reverse) ? ou(cylinder, sphere)	: ou(sphere, cylinder);	break;
+		case CON_OR_CUB: (reverse) ? ou(cone, cube)			: ou(cube, cone);		break;
+		case CON_OR_SPH: (reverse) ? ou(cone, sphere)		: ou(sphere, cone);		break;
+		case CUB_OR_SPH: (reverse) ? ou(cube, sphere)		: ou(sphere, cube);		break;
+		case CYL_AND_CON: (reverse) ? e(cylinder, cone)	: e(cone, cylinder);		break;
+		case CYL_AND_CUB: (reverse) ? e(cylinder, cube)	: e(cube, cylinder);		break;
+		case CYL_AND_SPH: (reverse) ? e(cylinder, sphere)	: e(sphere, cylinder);	break;
+		case CON_AND_CUB: (reverse) ? e(cone, cube)		: e(cube, cone);			break;
+		case CON_AND_SPH: (reverse) ? e(cone, sphere)		: e(sphere, cone);		break;
+		case CUB_AND_SPH: (reverse) ? e(cube, sphere)		: e(sphere, cube);		break;
+		case CYL_SUB_CON: (reverse) ? sub(cylinder, cone)	: sub(cone, cylinder);	break;
+		case CYL_SUB_CUB: (reverse) ? sub(cylinder, cube)	: sub(cube, cylinder);	break;
+		case CYL_SUB_SPH: (reverse) ? sub(cylinder, sphere): sub(sphere, cylinder);	break;
+		case CON_SUB_CUB: (reverse) ? sub(cone, cube)		: sub(cube, cone);		break;
+		case CON_SUB_SPH: (reverse) ? sub(cone, sphere)	: sub(sphere, cone);		break;
+		case CUB_SUB_SPH: (reverse) ? sub(cube, sphere)	: sub(sphere, cube);		break;
     }
     glPopMatrix();
 	glFlush();
 	
-	//ativaIluminacao();
 	glutPostRedisplay();
     glutSwapBuffers();
 }
 
-void menu(int csgop)
-{
-  csg_op = csgop;
-  glutPostRedisplay();
-}
-
-
 void key(unsigned char key, int x, int y)
 {
   switch(key) {
-  case 'a':
-    viewangle -= 10.f;
-    glutPostRedisplay();
-    break;
-  case 's':
-    viewangle += 10.f;
-    glutPostRedisplay();
-    break;
-  case '\033':
-    exit(0);
+	case 'q': reverse = true; csg_op = CYL;			break;
+	case 'w': reverse = true; csg_op = CON;			break;
+	case 'e': reverse = true; csg_op = CUB;			break;
+	case 'r': reverse = true; csg_op = SPH;			break;
+	case 't': reverse = true; csg_op = CYL_OR_CON;	break;
+	case 'y': reverse = true; csg_op = CYL_OR_CUB;	break;
+	case 'u': reverse = true; csg_op = CYL_OR_SPH;	break;
+	case 'i': reverse = true; csg_op = CON_OR_CUB;	break;
+	case 'o': reverse = true; csg_op = CON_OR_SPH;	break;
+	case 'p': reverse = true; csg_op = CUB_OR_SPH;	break;
+	case 'a': reverse = true; csg_op = CYL_AND_CON;	break;
+	case 's': reverse = true; csg_op = CYL_AND_CUB;	break;
+	case 'd': reverse = true; csg_op = CYL_AND_SPH;	break;
+	case 'f': reverse = true; csg_op = CON_AND_CUB;	break;
+	case 'g': reverse = true; csg_op = CON_AND_SPH;	break;
+	case 'h': reverse = true; csg_op = CUB_AND_SPH;	break;
+	case 'z': reverse = true; csg_op = CYL_SUB_CON;	break;
+	case 'x': reverse = true; csg_op = CYL_SUB_CUB;	break;
+	case 'c': reverse = true; csg_op = CYL_SUB_SPH;	break;
+	case 'v': reverse = true; csg_op = CON_SUB_CUB;	break;
+	case 'b': reverse = true; csg_op = CON_SUB_SPH;	break;
+	case 'n': reverse = true; csg_op = CUB_SUB_SPH;	break;
+	case 'T': reverse = false; csg_op = CYL_OR_CON;	break;
+	case 'Y': reverse = false; csg_op = CYL_OR_CUB;	break;
+	case 'U': reverse = false; csg_op = CYL_OR_SPH;	break;
+	case 'I': reverse = false; csg_op = CON_OR_CUB;	break;
+	case 'O': reverse = false; csg_op = CON_OR_SPH;	break;
+	case 'P': reverse = false; csg_op = CUB_OR_SPH;	break;
+	case 'A': reverse = false; csg_op = CYL_AND_CON;	break;
+	case 'S': reverse = false; csg_op = CYL_AND_CUB;	break;
+	case 'D': reverse = false; csg_op = CYL_AND_SPH;	break;
+	case 'F': reverse = false; csg_op = CON_AND_CUB;	break;
+	case 'G': reverse = false; csg_op = CON_AND_SPH;	break;
+	case 'H': reverse = false; csg_op = CUB_AND_SPH;	break;
+	case 'Z': reverse = false; csg_op = CYL_SUB_CON;	break;
+	case 'X': reverse = false; csg_op = CYL_SUB_CUB;	break;
+	case 'C': reverse = false; csg_op = CYL_SUB_SPH;	break;
+	case 'V': reverse = false; csg_op = CON_SUB_CUB;	break;
+	case 'B': reverse = false; csg_op = CON_SUB_SPH;	break;
+	case 'N': reverse = false; csg_op = CUB_SUB_SPH;	break;
+	default: break;
   }
 }
 
 void init(){	 
-        glClearColor (1.0, 1.0, 1.0, 1.0);
-        ANGULO = 45;
-        rotX = rotY = 0;
-        obsX = obsY = 0;
-        obsZ = 20;//Voltar para 10
-        escalaX = escalaY = escalaZ = 1;
-}
-    
-void posicionaObservador (void) {
-    glMatrixMode (GL_MODELVIEW);/*Coordenadas na matrix de visualização*/  
-    glLoadIdentity();
-    glTranslatef(-obsX, -obsY, -obsZ-200);/*Translata a câmera para essas variáveis*/
-    glRotatef(rotX,1,0,0);/*Rotacionar a câmera para essas coordenadas*/
-    glRotatef(rotY,0,1,0);   
-}
-
-void especificaParametrosVisuais (void){
-    glMatrixMode(GL_PROJECTION);/*Modo de visualização da matriz, Projeção*/
-    glLoadIdentity();
-    gluPerspective (ANGULO, ASPECTO, 0.5, 500);
-    posicionaObservador();
-}
-
-void redesenhaPrimitivas(GLsizei largura, GLsizei altura){ 
-    if (altura == 0)
-    altura = 1;
-    glViewport (0, 0, largura, altura);/*Dimensiona o ViewPort*/
-    ASPECTO = (GLfloat) largura/ (GLfloat) altura;/*Calcula a correção de aspecto*/
-    especificaParametrosVisuais();        
-}
-
-int picked_object;
-int xpos = 0, ypos = 0;
-int newxpos, newypos;
-int startx, starty;
-
-void mouse(int botao, int estado, int x, int y){
-  //   if (botao == GLUT_RIGHT_BUTTON){
-		// if(estado == GLUT_UP) {
-		// 	picked_object = botao;
-		// 	xpos += newxpos;
-		// 	ypos += newypos;
-		// 	newxpos = 0;
-		// 	newypos = 0;
-		// 	bot=botao;
-		// } else { /* GLUT_DOWN */
-		// 	startx = x;
-		// 	starty = y;
-		// 	bot = 2;
-		// }
-  //  	}
-  //  	else{
-		if(estado == GLUT_DOWN){
-	        x_ini = x;
-	        y_ini = y;
-	        obsX_ini = obsX;
-	        obsY_ini = obsY;
-	        obsZ_ini = obsZ;
-	        rotX_ini = rotX;
-	        rotY_ini = rotY;
-	        bot=botao;
-	    }
-    	else
-	        bot = -1;		
-// 	}
-}
-
-#define DEGTORAD (2 * 3.1415 / 360)
-void motion(int x, int y){
-    if(bot == GLUT_LEFT_BUTTON){//Rotação
-        int deltaX = x_ini - x;
-        int deltaY = y_ini - y; 
-        rotX = rotX_ini - deltaY/ SENS_ROT;
-        rotY = rotY_ini - deltaX/ SENS_ROT;
-     }
-     else if (bot == GLUT_RIGHT_BUTTON){//Zoom
-		GLfloat r, objx, objy, objz;
-		
-		newxpos = x - startx;
-		newypos = starty - y;
-		
-		r = (newxpos + xpos) * 50.f/512.f;
-		objx = r * (float)cos(viewangle * DEGTORAD);
-		objy = (newypos + ypos) * 50.f/512.f;
-		objz = r * (float)sin(viewangle * DEGTORAD);
-		
-		switch(picked_object) {
-			case CSG_A:
-				coneX = objx;
-				coneY = objy;
-				coneZ = objz;
-			break;
-			case CSG_B:
-				sphereX = objx;
-				sphereY = objy;
-				sphereZ = objz;
-			break;
-			case CSG_C:
-				cubeX = objx;
-				cubeY = objy;
-				cubeZ = objz;
-			break;
-		}
-     }
-     else if (bot == GLUT_MIDDLE_BUTTON){//Correr
-         int deltaX = x_ini - x;
-         int deltaY = y_ini - y;
-         obsX = obsX_ini + deltaX/ SENS_TRANS;
-         obsY = obsY_ini + deltaY/ SENS_TRANS;
-     }
-     posicionaObservador();
-     glutPostRedisplay();
-}
-
-void stop()
-{
-	int a = 0;
-}
-    
-int main(int argc, char **argv)
-{
+    glClearColor (1.0, 1.0, 1.0, 1.0);
+    ANGULO = 45;
+    rotX = rotY = 0;
+    obsX = obsY = 0;
+    obsZ = 20;//Voltar para 10
+    escalaX = escalaY = escalaZ = 1;
 	
     static GLfloat lightpos[] = {25.f, 50.f, -50.f, 1.f};
     static GLfloat sphere_mat[] = {1.f, .5f, 0.f, 1.f};
@@ -350,33 +261,6 @@ int main(int argc, char **argv)
     static GLfloat cube_mat[] = {1.f, .0f, 0.f, 1.f};
     GLUquadricObj *sphere, *cone, *base;
 
-	glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
-    glutInitWindowSize(1000,1000);
-    glutInitWindowPosition(0,0);
-    glutCreateWindow("simple");
-    glutDisplayFunc(redraw);
-    glutReshapeFunc(redesenhaPrimitivas);/*Redesenho na tela*/
-    glutMouseFunc(mouse);/*Rotina do mouse*/
-    glutMotionFunc(motion);/*Rotina do movimento*/ 
-    glutKeyboardFunc(key); /*Rotina de teclado*/
-    init();
-
-    glutCreateMenu(menu);
-    glutAddMenuEntry("Desenha cone", CSG_A);
-    glutAddMenuEntry("Desenha Esfera", CSG_B);
-    glutAddMenuEntry("Denha Cubo", CSG_C);
-    glutAddMenuEntry("Cone Uniao Esfera", CSG_A_OR_B);
-    glutAddMenuEntry("Cone Uniao Cubo", CSG_A_OR_C);
-    glutAddMenuEntry("Esfera Uniao Cubo", CSG_B_OR_C);
-    glutAddMenuEntry("Cone + Esfera", CSG_A_AND_B);
-    glutAddMenuEntry("Cone + Cubo", CSG_A_AND_C);
-    glutAddMenuEntry("Cone - Esfera", CSG_A_SUB_B);
-    glutAddMenuEntry("Cone - Cubo", CSG_A_SUB_C);
-    glutAddMenuEntry("Esfera - Cone", CSG_B_SUB_A);
-    glutAddMenuEntry("Esfera - Cubo", CSG_B_SUB_C);
-    glutAttachMenu(GLUT_RIGHT_BUTTON);
-	
     glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -426,6 +310,87 @@ int main(int argc, char **argv)
     glMatrixMode(GL_PROJECTION);
     glOrtho(-50., 50., -50., 50., -50., 50.);
     glMatrixMode(GL_MODELVIEW); 
+
+}
+    
+void posicionaObservador (void) {
+    glMatrixMode (GL_MODELVIEW);/*Coordenadas na matrix de visualização*/  
+    glLoadIdentity();
+    glTranslatef(-obsX, -obsY, -obsZ-200);/*Translata a câmera para essas variáveis*/
+    glRotatef(rotX,1,0,0);/*Rotacionar a câmera para essas coordenadas*/
+    glRotatef(rotY,0,1,0);   
+}
+
+void especificaParametrosVisuais (void){
+    glMatrixMode(GL_PROJECTION);/*Modo de visualização da matriz, Projeção*/
+    glLoadIdentity();
+    gluPerspective (ANGULO, ASPECTO, 0.5, 500);
+    posicionaObservador();
+}
+
+void redesenhaPrimitivas(GLsizei largura, GLsizei altura){ 
+    if (altura == 0)
+    altura = 1;
+    glViewport (0, 0, largura, altura);/*Dimensiona o ViewPort*/
+    ASPECTO = (GLfloat) largura/ (GLfloat) altura;/*Calcula a correção de aspecto*/
+    especificaParametrosVisuais();        
+}
+
+int picked_object;
+int xpos = 0, ypos = 0;
+int newxpos, newypos;
+int startx, starty;
+
+void mouse(int botao, int estado, int x, int y){
+		if(estado == GLUT_DOWN){
+	        x_ini = x;
+	        y_ini = y;
+	        obsX_ini = obsX;
+	        obsY_ini = obsY;
+	        obsZ_ini = obsZ;
+	        rotX_ini = rotX;
+	        rotY_ini = rotY;
+	        bot=botao;
+	    }
+    	else
+	        bot = -1;
+}
+
+#define DEGTORAD (2 * 3.1415 / 360)
+void motion(int x, int y){
+    if(bot == GLUT_LEFT_BUTTON){//Rotação
+        int deltaX = x_ini - x;
+        int deltaY = y_ini - y; 
+        rotX = rotX_ini - deltaY/ SENS_ROT;
+        rotY = rotY_ini - deltaX/ SENS_ROT;
+     }
+     else if (bot == GLUT_RIGHT_BUTTON){//Zoom
+         int deltaZ = y_ini - y;
+         obsZ = obsZ_ini + deltaZ/ SENS_OBS;
+     }
+     else if (bot == GLUT_MIDDLE_BUTTON){//Correr
+         int deltaX = x_ini - x;
+         int deltaY = y_ini - y;
+         obsX = obsX_ini + deltaX/ SENS_TRANS;
+         obsY = obsY_ini + deltaY/ SENS_TRANS;
+     }
+     posicionaObservador();
+     glutPostRedisplay();
+}
+    
+int main(int argc, char **argv)
+{
+	glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_STENCIL | GLUT_DOUBLE);
+    glutInitWindowSize(1000,1000);
+    glutInitWindowPosition(0,0);
+    glutCreateWindow("simple");
+    glutDisplayFunc(redraw);
+    glutReshapeFunc(redesenhaPrimitivas);/*Redesenho na tela*/
+    glutMouseFunc(mouse);/*Rotina do mouse*/
+    glutMotionFunc(motion);/*Rotina do movimento*/ 
+    glutKeyboardFunc(key); /*Rotina de teclado*/
+    init();
     glutMainLoop();
     
 	return 0;
